@@ -1,52 +1,142 @@
 package helper
 
 import (
-	"fmt"
+	"moonlay/model/domain"
+	"reflect"
 	"strconv"
 
 	"github.com/xuri/excelize/v2"
 )
 
-func CreateData(data [][]string) {
-	f := excelize.NewFile()
-	// Create a new sheet.
-	index := f.NewSheet("datamart_1")
-	// Set value of a cell.
-	iLoopRow := 1
-	for _, value := range data {
-		var cell string
-		iLoopCell := 1
+func CreateData(f *excelize.File, sheetName string, data interface{}, domain string, activeSell int, iteration int) {
 
-		for _, colCell := range value {
-
-			switch {
-			case iLoopCell == 1:
-				cell = "A"
-			case iLoopCell == 2:
-				cell = "B"
-			case iLoopCell == 3:
-				cell = "C"
-			case iLoopCell == 4:
-				cell = "D"
-			}
-
-			// Set value of a cell.
-			f.SetCellValue("datamart_1", cell+strconv.Itoa(iLoopRow), colCell)
-			// Set active sheet of the workbook.
-			f.SetActiveSheet(index)
-
-			if iLoopCell == 4 {
-				iLoopCell = 1
-				iLoopRow++
-			}
-
-			iLoopCell++
-		}
+	// check sheeet
+	indexSheet := f.GetSheetIndex(sheetName)
+	if indexSheet == -1 {
+		indexSheet = f.NewSheet(sheetName)
 	}
 
-	fmt.Println(index)
-	// Save spreadsheet by the given path.
-	if err := f.SaveAs("datamart1.xlsx"); err != nil {
-		fmt.Println(err)
+	f.SetActiveSheet(indexSheet)
+
+	rv := reflect.ValueOf(data)
+	datamart := ChooseDomain(domain)
+
+	if iteration > 0 {
+		activeSell++
+	}
+	for i := 0; i < rv.Len(); i++ {
+		data := rv.Index(i)
+		datamart = datamart.ChangeReflectValueToDataMart1(data)
+
+		if activeSell == 1 {
+			field := GetField(*datamart)
+			f.SetSheetRow(sheetName, "A1", &field)
+			activeSell++
+		}
+
+		dataRow := ConvertToString(*datamart)
+		f.SetSheetRow(sheetName, "A"+strconv.Itoa(activeSell), &dataRow)
+
+		activeSell++
+	}
+
+	if err := f.Save(); err != nil {
+		PanicIFError(err)
+	}
+}
+
+func CreateDataMart1(f *excelize.File, sheetName string, data []domain.Datamart1, activeSell int, iteration int) {
+	// check sheeet
+	indexSheet := f.GetSheetIndex(sheetName)
+	if indexSheet == -1 {
+		indexSheet = f.NewSheet(sheetName)
+	}
+
+	f.SetActiveSheet(indexSheet)
+
+	if iteration > 0 {
+		activeSell++
+	}
+
+	for _, value := range data {
+		datamart := &value
+
+		if activeSell == 1 {
+			field := GetField(*datamart)
+			f.SetSheetRow(sheetName, "A1", &field)
+			activeSell++
+		}
+
+		dataRow := ConvertToString(*datamart)
+		f.SetSheetRow(sheetName, "A"+strconv.Itoa(activeSell), &dataRow)
+		activeSell++
+	}
+
+	if err := f.Save(); err != nil {
+		PanicIFError(err)
+	}
+}
+
+func CreateDataMart2(f *excelize.File, sheetName string, data []domain.Datamart2, activeSell int, iteration int) {
+	// check sheeet
+	indexSheet := f.GetSheetIndex(sheetName)
+	if indexSheet == -1 {
+		indexSheet = f.NewSheet(sheetName)
+	}
+
+	f.SetActiveSheet(indexSheet)
+
+	if iteration > 0 {
+		activeSell++
+	}
+
+	for _, value := range data {
+		datamart := &value
+
+		if activeSell == 1 {
+			field := GetField(*datamart)
+			f.SetSheetRow(sheetName, "A1", &field)
+			activeSell++
+		}
+
+		dataRow := ConvertToString(*datamart)
+		f.SetSheetRow(sheetName, "A"+strconv.Itoa(activeSell), &dataRow)
+		activeSell++
+	}
+
+	if err := f.Save(); err != nil {
+		PanicIFError(err)
+	}
+}
+
+func CreateDataMart3(f *excelize.File, sheetName string, data []domain.Datamart3, activeSell int, iteration int) {
+	// check sheeet
+	indexSheet := f.GetSheetIndex(sheetName)
+	if indexSheet == -1 {
+		indexSheet = f.NewSheet(sheetName)
+	}
+
+	f.SetActiveSheet(indexSheet)
+
+	if iteration > 0 {
+		activeSell++
+	}
+
+	for _, value := range data {
+		datamart := &value
+
+		if activeSell == 1 {
+			field := GetField(*datamart)
+			f.SetSheetRow(sheetName, "A1", &field)
+			activeSell++
+		}
+
+		dataRow := ConvertToString(*datamart)
+		f.SetSheetRow(sheetName, "A"+strconv.Itoa(activeSell), &dataRow)
+		activeSell++
+	}
+
+	if err := f.Save(); err != nil {
+		PanicIFError(err)
 	}
 }

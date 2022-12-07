@@ -15,13 +15,11 @@ func NewRepositoryCustomer() RepositoryCustomer {
 }
 
 func (r *RepositoryCustomerImpl) Save(ctx context.Context, tx *sql.Tx, customers domain.Customers) domain.Customers {
-	SQL := "insert into customers(customer_id,customer_name,status) values (?,?,?)"
-	result, err := tx.ExecContext(ctx, SQL, customers.CustomerId, customers.CustomerName, customers.Status)
+	SQL := "insert into customers(customer_id,customer_name,status) values ($1,$2,$3) returning id"
+	LastInserId := 0
+	err := tx.QueryRowContext(ctx, SQL, customers.CustomerId, customers.CustomerName, customers.Status).Scan(&LastInserId)
 	helper.PanicIFError(err)
 
-	id, err := result.LastInsertId()
-	helper.PanicIFError(err)
-
-	customers.Id = int(id)
+	customers.Id = int(LastInserId)
 	return customers
 }

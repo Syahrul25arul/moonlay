@@ -2,13 +2,17 @@ package app
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"moonlay/helper"
+
+	_ "github.com/lib/pq"
 )
 
 func NewDB() *sql.DB {
-	db, err := sql.Open("mysql", "root:password@tcp(localhost:3301)/belajar_golang_restfull_api")
+	connStr := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=disable", "postgres", "password", "localhost", "5431", "moonlay_test")
+	db, err := sql.Open("postgres", connStr)
 	helper.PanicIFError(err)
 
 	db.SetMaxIdleConns(5)

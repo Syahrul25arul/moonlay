@@ -5,7 +5,7 @@ CREATE TABLE customers (
     customer_id varchar (20) not null,
     customer_name varchar (50) not null,
     status status default 'N',
-    CONSTRAINT users_pkey PRIMARY KEY (id)
+    CONSTRAINT customers_pkey PRIMARY KEY (id)
 );
 
 
@@ -15,7 +15,7 @@ CREATE TABLE products (
     product_name varchar(50) not null,
     currency_code varchar(10),
     status status default 'N',
-    CONSTRAINT token_pkey PRIMARY KEY (id)
+    CONSTRAINT products_pkey PRIMARY KEY (id)
 );
 
 CREATE TABLE transactions (
@@ -41,51 +41,37 @@ CREATE TABLE transactions (
     complete_status_buyer varchar(20),
     complete_status_seller varchar(20),
     status status,
-    CONSTRAINT token_pkey PRIMARY KEY (id)
-)
+    CONSTRAINT transaction_pkey PRIMARY KEY (id)
+);
 
--- -- create table customers
--- CREATE TABLE customers (
---     customer_id serial primary key,
---     name varchar (25) not null,
---     date_of_birth date not null,
---     zip_code varchar(10) not null,
---     status status default 'inactive',
---     created_at timestamp default now()
--- );
+-- create view datamart1
 
--- -- create index for searching with where clause
--- CREATE INDEX customers_zip_code_and_status ON customers(zip_code, status);
+create view datamart as select t.transaction_id
+, t.buyer_id 
+, c.customer_name as buyer_name
+, t.seller_id 
+, c2.customer_name as seller_name
+, t.product_id 
+, p.product_name 
+, p.currency_code as currency
+, t.price 
+, t.volume 
+, t.value 
+, t.transaction_date 
+, extract(month from t.transaction_date) as transaction_month
+, extract(year from t.transaction_date) as transaction_year
+, t.entry_date
+, extract(month from t.entry_date) as entry_month
+, extract(year from t.entry_date) as entry_year
+, t.buy_sell 
+, t.confirm_status
+, t.complete_status_buyer
+, t.complete_status_seller 
+from transactions t 
+left join customers c on c.customer_id = t.buyer_id 
+left join customers c2 on c2.customer_id = t.seller_id 
+left join products p on p.product_id = t.product_id ;
 
 
-
--- -- create table category
--- CREATE TABLE categories (
---     category_id serial not null,
---     category_name varchar(20) not null,
---     CONSTRAINT category_pkey PRIMARY KEY (category_id)
--- );
-
--- -- create table product
--- CREATE TABLE products (
---     product_id serial not null,
---     product_name varchar(255) not null,
---     category_id integer references categories(category_id),
---     price decimal DEFAULT 0,
---     stock integer DEFAULT 0,
---     product_description text,
---     CONSTRAINT product_pkey PRIMARY KEY (product_id)
--- );
-
--- -- create index for searching where cluase by category and stock
--- CREATE INDEX product_category_status ON products(category_id,stock);
-
--- ALTER TABLE products ADD CONSTRAINT price_check check (price >= 0);
--- ALTER TABLE products ADD CONSTRAINT stock_check check (stock >= 0);
-
--- -- create table images
--- CREATE TABLE images (
---     product_id integer references products(product_id),
---     image_url varchar(255)
--- );
+select * from datamart d;
 

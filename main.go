@@ -1,42 +1,20 @@
 package main
 
-import (
-	"moonlay/helper"
-	"moonlay/scheduler"
-)
+import "moonlay/app"
 
 func main() {
-	// sheetnames := []string{"customers", "products", "transactions"}
-
-	// for _, sheetname := range sheetnames {
-	// 	rows, err := helper.ReadData(sheetname)
-	// 	helper.PanicIFError(err)
-
-	// 	callback := helper.CreateData
-
-	// 	scheduler.StartScheduler(callback, rows)
-	// }
-
-	rows, err := helper.ReadData("customers")
-	helper.PanicIFError(err)
-
-	callback := helper.CreateData
-
-	scheduler.StartScheduler(callback, rows)
-
-	forever := make(chan string)
+	app.Start()
 
 	// taskScheduler := chrono.NewDefaultTaskScheduler()
+	// now := time.Now()
+	// startTime := now.Add(time.Minute * 1)
 
-	// _, err = taskScheduler.ScheduleAtFixedRate(func(ctx context.Context) {
-	// 	log.Print("Fixed Rate of 5 seconds")
-	// }, 20*time.Second)
+	// task, err := taskScheduler.Schedule(func(ctx context.Context) {
+	// 	log.Print("One-Shot Task")
+	// }, chrono.WithTime(startTime))
 
 	// if err == nil {
 	// 	log.Print("Task has been scheduled successfully.")
 	// }
 
-	// db := app.NewDB()
-	// repository_customer := repository_customer.NewRepositoryCustomer()
-	<-forever
 }
