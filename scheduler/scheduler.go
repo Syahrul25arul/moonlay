@@ -7,11 +7,9 @@ import (
 	"moonlay/helper"
 	"strconv"
 	"time"
-
-	"github.com/xuri/excelize/v2"
 )
 
-func StartScheduler(totalData int, ctx context.Context, f *excelize.File, domain string, sheetName string, callback func(i int, sheetName string, domain string)) {
+func StartScheduler(totalData int, ctx context.Context, domain string, sheetName string, callback func(i int, sheetName string, domain string)) {
 	interval, err := strconv.ParseInt(fmt.Sprintf("%.0f", math.Ceil(float64(totalData)/float64(100))), 10, 64)
 	helper.PanicIFError(err)
 

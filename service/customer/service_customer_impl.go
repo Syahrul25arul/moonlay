@@ -18,29 +18,24 @@ func NewServiceCustomer(repositoryCustomer repository_customer.RepositoryCustome
 }
 
 func (s *ServiceCustomerImpl) CreateCustomerFromFile(ctx context.Context, data [][]string) {
+	/*
+	* setup tx transaction from db
+	* commit or rollback at the end of this method
+	 */
 	tx, err := s.DB.Begin()
-
 	helper.PanicIFError(err)
 	defer helper.CommitOrRollback(tx)
 
-	var customer = domain.Customers{}
+	// * set struct customer for send to repository
+	var customer = &domain.Customers{}
+	repo := s.repositoryCustomer
 
-	for j, valueSlice := range data {
-		if j == 0 {
-			continue
-		}
-		for i, valueString := range valueSlice {
-
-			switch {
-			case (i+1)%3 == 0:
-				customer.CustomerName = valueString
-			case (i+1)%4 == 0:
-				customer.Status = valueString
-				s.repositoryCustomer.Save(ctx, tx, customer)
-			default:
-				customer.CustomerId = valueString
-			}
-
-		}
-	}
+	/*
+	* iterate data array customers for excel file
+	* and send to repository for save to db
+	 */
+	helper.ExtractMultiDimensitinString(data, func(s []string) {
+		customer.ConvertDataStringToCustomers(s)
+		repo.Save(context.Background(), tx, *customer)
+	})
 }

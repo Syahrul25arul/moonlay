@@ -18,31 +18,24 @@ func NewServiceProduct(repository repository_product.RepositoryProduct, db *sql.
 }
 
 func (s *serviceProductImpl) CreateProductFromFile(ctx context.Context, data [][]string) {
+	/*
+	* setup tx transaction from db
+	* commit or rollback at the end of this method
+	 */
 	tx, err := s.DB.Begin()
-
 	helper.PanicIFError(err)
 	defer helper.CommitOrRollback(tx)
 
-	product := domain.Products{}
+	// * set struct products for send to repository
+	product := &domain.Products{}
+	repo := s.repositoryProduct
 
-	for i, valueSlice := range data {
-		if i == 0 {
-			continue
-		}
-
-		for j, valueCell := range valueSlice {
-
-			switch {
-			case (j+1)%3 == 0:
-				product.ProductName = valueCell
-			case (j+1)%4 == 0:
-				product.CurrencyCode = valueCell
-			case (j+1)%5 == 0:
-				product.Status = valueCell
-				s.repositoryProduct.Save(context.Background(), tx, product)
-			default:
-				product.ProductId = valueCell
-			}
-		}
-	}
+	/*
+	* iterate data array products for excel file
+	* and send to repository for save to db
+	 */
+	helper.ExtractMultiDimensitinString(data, func(s []string) {
+		product.ConvertDataStringToProducts(s)
+		repo.Save(ctx, tx, *product)
+	})
 }
