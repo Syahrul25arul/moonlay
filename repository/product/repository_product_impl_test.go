@@ -2,7 +2,6 @@ package repository_product
 
 import (
 	"context"
-	"fmt"
 	"moonlay/database"
 	"moonlay/helper"
 	"moonlay/model/domain"
@@ -32,7 +31,7 @@ func TestRepositoryProductImpl_Save(t *testing.T) {
 	}()
 	defer helper.CommitOrRollback(tx)
 
-	database.TruncateAllTable(tx)
+	database.TruncateAllTable(db)
 
 	repository := NewRepositoryProduct()
 
@@ -90,7 +89,6 @@ func TestRepositoryProductImpl_Save(t *testing.T) {
 			}
 
 			result := tt.r.Save(context.Background(), tx, tt.want)
-			fmt.Println(tt.name)
 
 			assert.Equal(t, tt.expected, result)
 		})
