@@ -1,6 +1,7 @@
-package app
+package database
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"time"
@@ -21,4 +22,9 @@ func NewDB() *sql.DB {
 	db.SetConnMaxIdleTime(10 * time.Minute)
 
 	return db
+}
+
+func TruncateAllTable(db *sql.Tx) {
+	sql := "TRUNCATE TABLE customers,products,transactions restart identity cascade"
+	db.ExecContext(context.Background(), sql)
 }

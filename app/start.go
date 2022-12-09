@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"fmt"
+	"moonlay/database"
 	"moonlay/excel"
 	"moonlay/helper"
 	"time"
@@ -27,7 +28,7 @@ func Start() {
 
 	// * set database connection and close at the end
 
-	sql := NewDB()
+	sql := database.NewDB()
 	defer sql.Close()
 	fmt.Println(fmt.Sprintf("duration execution setup app %s", time.Since(start)))
 
