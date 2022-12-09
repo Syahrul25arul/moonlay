@@ -24,7 +24,7 @@ func NewDB() *sql.DB {
 	return db
 }
 
-func TruncateAllTable(db *sql.Tx) {
-	sql := "TRUNCATE TABLE customers,products,transactions restart identity cascade"
+func TruncateAllTable(db *sql.DB) {
+	sql := "TRUNCATE TABLE transactions,products,customers restart identity"
 	db.ExecContext(context.Background(), sql)
 }
