@@ -16,6 +16,17 @@ func GetField(data interface{}) []string {
 	return result
 }
 
+func GetFieldForExcel(data interface{}) []string {
+	rf := reflect.TypeOf(data)
+	var result []string
+
+	for i := 0; i < rf.NumField(); i++ {
+
+		result = append(result, string(rf.Field(i).Tag.Get("excel")))
+	}
+	return result
+}
+
 // ? extract array 2 dimention to string
 func ExtractMultiDimensitinString(data [][]string, callback func([]string)) {
 	for i, valueSlice := range data {

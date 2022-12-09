@@ -6,46 +6,46 @@ import (
 )
 
 type Datamart1 struct {
-	TransactionId        string
-	BuyerId              string
-	BuyerName            string
-	SellerId             string
-	SellerName           string
-	ProductId            string
-	ProductName          string
-	Currency             string
-	Price                int
-	Volume               int
-	Value                int64
-	TransactionDate      time.Time
-	TransactionMonth     int
-	TransactionYear      int
-	EntryDate            time.Time
-	EntryMonth           int
-	EntryYear            int
-	Buysell              string
-	ConfirmStatus        string
-	CompleteStatusBuyer  string
-	CompleteStatusSeller string
+	TransactionId        string    `excel:"transaction_id"`
+	BuyerId              string    `excel:"buyer_id"`
+	BuyerName            string    `excel:"buyer_name"`
+	SellerId             string    `excel:"seller_id"`
+	SellerName           string    `excel:"seller_name"`
+	ProductId            string    `excel:"product_id"`
+	ProductName          string    `excel:"product_name"`
+	Currency             string    `excel:"currency"`
+	Price                int       `excel:"price"`
+	Volume               int       `excel:"volume"`
+	Value                int64     `excel:"value"`
+	TransactionDate      time.Time `excel:"transaction_date"`
+	TransactionMonth     int       `excel:"transaction_month"`
+	TransactionYear      int       `excel:"transaction_year"`
+	EntryDate            time.Time `excel:"entry_date"`
+	EntryMonth           int       `excel:"entry_month"`
+	EntryYear            int       `excel:"entry_year"`
+	Buysell              string    `excel:"buy_sell"`
+	ConfirmStatus        string    `excel:"confirm_status"`
+	CompleteStatusBuyer  string    `excel:"complete_status_buyer"`
+	CompleteStatusSeller string    `excel:"complete_status_seller"`
 }
 
 type Datamart3 struct {
-	CustomerId      string
-	CustomerName    string
-	Price           int
-	Volume          int
-	Value           int
-	TransactionDate time.Time
-	EntryDate       time.Time
+	CustomerId      string    `excel:"customer_id"`
+	CustomerName    string    `excel:"customer_name"`
+	Price           int       `excel:"price"`
+	Volume          int       `excel:"volume"`
+	Value           int       `excel:"value"`
+	TransactionDate time.Time `excel:"transaction_date"`
+	EntryDate       time.Time `excel:"entry_date"`
 }
 type Datamart2 struct {
-	ProductId       string
-	ProductName     string
-	Price           int
-	Volume          int
-	Value           int
-	TransactionDate time.Time
-	EntryDate       time.Time
+	ProductId       string    `excel:"product_id"`
+	ProductName     string    `excel:"product_name"`
+	Price           int       `excel:"price"`
+	Volume          int       `excel:"volume"`
+	Value           int       `excel:"value"`
+	TransactionDate time.Time `excel:"transaction_date"`
+	EntryDate       time.Time `excel:"entry_date"`
 }
 
 func (datamart *Datamart1) GetNumField(data Datamart1) []string {

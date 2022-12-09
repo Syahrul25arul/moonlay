@@ -7,10 +7,13 @@ import (
 	"moonlay/model/domain"
 	"os"
 	"strconv"
+	"sync/atomic"
 	"time"
 
 	"github.com/xuri/excelize/v2"
 )
+
+// const collArray [] = []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
 
 type excelImpl struct {
 	file *excelize.File
@@ -22,22 +25,25 @@ func NewExcel() Excel {
 	}
 }
 
+func GetLastIndexCollExcel(lenField int) string {
+	collArray := []string{"A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"}
+	return collArray[lenField-1]
+}
+
 // * Get file excel, if file not exists create new file
 func (e *excelImpl) GetFile(name string) Excel {
+	var file *excelize.File
 	file, err := excelize.OpenFile(name)
 	if err != nil {
-		file := excelize.NewFile()
-
-		file.SetSheetName("Sheet1", "datamart")
-		file.NewSheet("datamart1")
-		file.NewSheet("datamart2")
+		file = excelize.NewFile()
+		file.DeleteSheet("Sheet1")
 		err := file.SaveAs(name)
 		helper.PanicIFError(err)
-	}
 
-	errs := e.CheckFile(name)
-	if errs {
-		helper.PanicIFError(errors.New("file not exists"))
+		errs := e.CheckFile(name)
+		if errs {
+			helper.PanicIFError(errors.New("file not exists"))
+		}
 	}
 
 	return &excelImpl{
@@ -71,8 +77,10 @@ func (e *excelImpl) CheckFile(nameFile string) bool {
 	tk.Stop()
 	return fileExist
 }
-func (e *excelImpl) CreateDataMart1(sheetName string, data []domain.Datamart1, activeSell int, iteration int) {
+func (e *excelImpl) CreateDataMart1(sheetName string, data []domain.Datamart1, activeSell int32, iteration int) {
+	// TODO: close the file if not in use
 	// check sheeet
+	defer e.file.Close()
 	indexSheet := e.file.GetSheetIndex(sheetName)
 	if indexSheet == -1 {
 		indexSheet = e.file.NewSheet(sheetName)
@@ -82,13 +90,13 @@ func (e *excelImpl) CreateDataMart1(sheetName string, data []domain.Datamart1, a
 
 	// * set iteration to 1 for cell in excel
 	if iteration > 0 {
-		activeSell++
+		atomic.AddInt32(&activeSell, 1)
 	}
 
 	// TODO: set struct and set row for field in excel
 	datamart := &domain.Datamart1{}
-	setFieldRow(e.file, sheetName, activeSell, func() []string {
-		return helper.GetField(*datamart)
+	activeSell = setFieldRow(e.file, sheetName, activeSell, func() []string {
+		return helper.GetFieldForExcel(*datamart)
 	})
 
 	// TODO: set data to excel
@@ -103,7 +111,9 @@ func (e *excelImpl) CreateDataMart1(sheetName string, data []domain.Datamart1, a
 	}
 }
 
-func (e *excelImpl) CreateDataMart2(sheetName string, data []domain.Datamart2, activeSell int, iteration int) {
+func (e *excelImpl) CreateDataMart2(sheetName string, data []domain.Datamart2, activeSell int32, iteration int) {
+	// TODO: close the file if not in use
+	defer e.file.Close()
 	// check sheeet
 	indexSheet := e.file.GetSheetIndex(sheetName)
 	if indexSheet == -1 {
@@ -119,8 +129,8 @@ func (e *excelImpl) CreateDataMart2(sheetName string, data []domain.Datamart2, a
 
 	// TODO: set struct and set row for field in excel
 	datamart := &domain.Datamart2{}
-	setFieldRow(e.file, sheetName, activeSell, func() []string {
-		return helper.GetField(*datamart)
+	activeSell = setFieldRow(e.file, sheetName, activeSell, func() []string {
+		return helper.GetFieldForExcel(*datamart)
 	})
 
 	// TODO: set data to excel
@@ -135,7 +145,9 @@ func (e *excelImpl) CreateDataMart2(sheetName string, data []domain.Datamart2, a
 	}
 }
 
-func (e *excelImpl) CreateDataMart3(sheetName string, data []domain.Datamart3, activeSell int, iteration int) {
+func (e *excelImpl) CreateDataMart3(sheetName string, data []domain.Datamart3, activeSell int32, iteration int) {
+	// TODO: close the file if not in use
+	defer e.file.Close()
 	// check sheeet
 	indexSheet := e.file.GetSheetIndex(sheetName)
 	if indexSheet == -1 {
@@ -151,8 +163,8 @@ func (e *excelImpl) CreateDataMart3(sheetName string, data []domain.Datamart3, a
 
 	// TODO: set struct and set row for field in excel
 	datamart := &domain.Datamart3{}
-	setFieldRow(e.file, sheetName, activeSell, func() []string {
-		return helper.GetField(*datamart)
+	activeSell = setFieldRow(e.file, sheetName, activeSell, func() []string {
+		return helper.GetFieldForExcel(*datamart)
 	})
 
 	// TODO: set data to excel
@@ -189,18 +201,22 @@ func (e *excelImpl) ReadData(sheetname, filename string) ([][]string, error) {
 	return rows, nil
 }
 
-func setDataToExcel(file *excelize.File, sheetName string, len int, activeSell int, callback func(i int) []string) {
+func setDataToExcel(file *excelize.File, sheetName string, len int, activeSell int32, callback func(i int) []string) {
 	for i := 0; i < len; i++ {
 		dataRow := callback(i)
-		file.SetSheetRow(sheetName, "A"+strconv.Itoa(activeSell), &dataRow)
+		file.SetSheetRow(sheetName, "A"+strconv.Itoa(int(activeSell)), &dataRow)
 		activeSell++
 	}
 }
 
-func setFieldRow(file *excelize.File, sheetName string, activeSell int, callback func() []string) {
+func setFieldRow(file *excelize.File, sheetName string, activeSell int32, callback func() []string) int32 {
 	if activeSell == 1 {
 		field := callback()
+		lastColl := GetLastIndexCollExcel(len(field))
+		file.SetColWidth(sheetName, "A", lastColl, 20)
 		file.SetSheetRow(sheetName, "A1", &field)
 		activeSell++
+		return activeSell
 	}
+	return activeSell
 }
