@@ -70,6 +70,18 @@ func TestServiceCustomerImpl_CreateCustomerFromFile(t *testing.T) {
 			},
 			expected: errors.New("runtime error: index out of range [2] with length 2"),
 		},
+		{
+			name: "save customer failed close connection",
+			s:    serviceCustomer,
+			want: [][]string{
+				{},
+				{
+					"lsadnkf",
+					"alskdfnm",
+				},
+			},
+			expected: errors.New("sql: database is closed"),
+		},
 	}
 	for i, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -82,6 +94,16 @@ func TestServiceCustomerImpl_CreateCustomerFromFile(t *testing.T) {
 				assert.PanicsWithError(t, tt.expected.Error(), func() {
 					tt.s.CreateCustomerFromFile(context.Background(), tt.want)
 				})
+			}
+			if i == 2 {
+				db.Close()
+				defer func() {
+					if r := recover(); r != nil {
+						errs := r.(error)
+						assert.Equal(t, tt.expected.Error(), errs.Error())
+					}
+				}()
+				tt.s.CreateCustomerFromFile(context.Background(), tt.want)
 			}
 		})
 	}
